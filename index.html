@@ -21,7 +21,7 @@
 :root{
   --bg:#0B1120; --surface:#111A2E; --surface-2:#16213A; --line:#223050;
   --fg:#E8EDF5; --muted:#9DA9BF; --accent:#2DE2B0; --accent-ink:#06261E; --accent-soft:rgba(45,226,176,.12);
-  --term-bg:#070C17; --term-fg:#CFE3DA;
+  --term-bg:#070C17; --term-fg:#CFE3DA; --paper:#F3F5F8;
   --f-display:'Sora',ui-sans-serif,system-ui,sans-serif;
   --f-body:'IBM Plex Sans',ui-sans-serif,system-ui,sans-serif;
   --f-mono:'JetBrains Mono',ui-monospace,'SFMono-Regular',Menlo,monospace;
@@ -165,6 +165,37 @@ details li{margin-bottom:4px}
 .cred-foot a:hover{border-color:var(--accent);color:var(--accent)}
 .proof{font-family:var(--f-mono);font-size:12.5px;color:var(--muted);margin-top:18px;display:flex;flex-wrap:wrap;gap:6px 14px}
 .proof b{color:var(--accent);font-weight:500}
+/* certificate carousel */
+.carousel{position:relative;margin-bottom:12px}
+.car-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.car-head h3{font-family:var(--f-mono);font-size:13px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.car-ctrl{display:flex;align-items:center;gap:10px}
+.car-count{font-family:var(--f-mono);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;min-width:48px;text-align:center}
+.car-btn{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer;display:grid;place-items:center}
+.car-btn:hover{border-color:var(--accent);color:var(--accent)}
+.car-btn:disabled{opacity:.35;cursor:default;border-color:var(--line);color:var(--fg)}
+.car-track{display:flex;gap:20px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;padding-bottom:6px;scrollbar-width:none;outline-offset:4px}
+.car-track::-webkit-scrollbar{display:none}
+.slide{flex:0 0 min(440px,82%);scroll-snap-align:start;margin:0;display:flex;flex-direction:column;gap:12px;min-width:0}
+.slide-img{display:block;width:100%;padding:0;border:1px solid var(--line);border-radius:12px;background:var(--paper);aspect-ratio:4/3;overflow:hidden;cursor:zoom-in;position:relative;transition:border-color .2s}
+.slide-img:hover{border-color:var(--accent)}
+.slide-img img{width:100%;height:100%;object-fit:contain;display:block}
+.slide-img .zoom{position:absolute;right:10px;bottom:10px;width:34px;height:34px;border-radius:8px;background:rgba(11,17,32,.72);color:#fff;display:grid;place-items:center;opacity:0;transition:opacity .2s}
+.slide-img:hover .zoom,.slide-img:focus-visible .zoom{opacity:1}
+.slide figcaption{display:flex;justify-content:space-between;gap:12px;align-items:baseline;flex-wrap:wrap}
+.slide figcaption b{font-family:var(--f-display);font-weight:600;font-size:16px}
+.slide figcaption span{font-size:13px;color:var(--muted)}
+.dots{display:flex;gap:6px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.dots button{width:28px;height:28px;padding:0;border:0;background:none;cursor:pointer;display:grid;place-items:center}
+.dots button::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--line);transition:all .2s}
+.dots button[aria-current="true"]::before{background:var(--accent);width:20px;border-radius:4px}
+.lightbox{position:fixed;inset:0;z-index:50;background:rgba(5,9,18,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px))}
+.lightbox img{max-width:min(1100px,100%);max-height:78vh;object-fit:contain;border-radius:8px;background:#fff}
+.lb-cap{color:#E8EDF5;font-size:14px;text-align:center}
+.lb-cap span{color:#9DA9BF}
+.lb-bar{display:flex;gap:10px}
+.lb-bar button{width:44px;height:44px;border-radius:50%;border:1px solid #2A3753;background:#111A2E;color:#E8EDF5;cursor:pointer;display:grid;place-items:center}
+.lb-bar button:hover{border-color:#2DE2B0;color:#2DE2B0}
 /* in-progress */
 .certs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:28px}
 .cert{display:flex;gap:14px;align-items:flex-start;padding:16px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
@@ -330,12 +361,43 @@ footer{padding-block:40px;color:var(--muted);font-size:13px;font-family:var(--f-
     <div class="sec-head">
       <div class="eyebrow">Certificaciones</div>
       <h2 id="h-cert">Credenciales verificables</h2>
-      <p>Cursos y certificaciones completados. Cada uno incluye su código o enlace de verificación.</p>
+      <p>Cursos y certificaciones completados. Desliza la galería para ver cada certificado; toca uno para ampliarlo.</p>
     </div>
     <div class="cred-summary">
       <div><b>9</b><span>certificados completados</span></div>
       <div><b>3</b><span>en ciberseguridad</span></div>
       <div><b>3</b><span>en curso</span></div>
+    </div>
+
+    <div class="carousel" aria-roledescription="carrusel" aria-label="Certificados">
+      <div class="car-head">
+        <h3>Galería de certificados</h3>
+        <div class="car-ctrl">
+          <button class="car-btn" type="button" id="carPrev" aria-label="Certificado anterior"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+          <span class="car-count" id="carCount" aria-live="polite">1 / 7</span>
+          <button class="car-btn" type="button" id="carNext" aria-label="Certificado siguiente"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+        </div>
+      </div>
+      <div class="car-track" id="carTrack" tabindex="0" aria-label="Desliza para ver los certificados">
+        <figure class="slide"><button class="slide-img" type="button" aria-label="Ampliar Cybersecurity Certification Expert"><img src="certs/certiplus-expert.jpg" alt="Certificado Cybersecurity Certification Expert de CertiPlus" width="1174" height="900"><span class="zoom" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4M11 8v6M8 11h6"/></svg></span></button><figcaption><b>Cybersecurity Certification Expert</b><span>CertiPlus · Oct 2026</span></figcaption></figure>
+        <figure class="slide"><button class="slide-img" type="button" aria-label="Ampliar Ciberseguridad Nivel Avanzado"><img src="certs/indotel-avanzado.jpg" alt="Certificado Ciberseguridad Nivel Avanzado de INDOTEL, BID y Cymetria" width="1400" height="1089" loading="lazy"><span class="zoom" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4M11 8v6M8 11h6"/></svg></span></button><figcaption><b>Ciberseguridad: Nivel Avanzado</b><span>INDOTEL · 80 h · Sep 2026</span></figcaption></figure>
+        <figure class="slide"><button class="slide-img" type="button" aria-label="Ampliar Ciberseguridad Nivel Intermedio"><img src="certs/indotel-intermedio.jpg" alt="Certificado Ciberseguridad Nivel Intermedio de INDOTEL, BID y Cymetria" width="1400" height="1089" loading="lazy"><span class="zoom" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4M11 8v6M8 11h6"/></svg></span></button><figcaption><b>Ciberseguridad: Nivel Intermedio</b><span>INDOTEL · 80 h · Sep 2026</span></figcaption></figure>
+        <figure class="slide"><button class="slide-img" type="button" aria-label="Ampliar Artificial Intelligence Fundamentals"><img src="certs/huawei-ai.jpg" alt="Certificado Artificial Intelligence Fundamentals de Huawei ICT Academy" width="990" height="1400" loading="lazy"><span class="zoom" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4M11 8v6M8 11h6"/></svg></span></button><figcaption><b>Artificial Intelligence Fundamentals</b><span>Huawei ICT Academy · Oct 2026</span></figcaption></figure>
+        <figure class="slide"><button class="slide-img" type="button" aria-label="Ampliar Fundamentos de Análisis de Datos"><img src="certs/cisco-data-analytics.jpg" alt="Certificado Fundamentos de Análisis de Datos de Cisco Networking Academy" width="1400" height="949" loading="lazy"><span class="zoom" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4M11 8v6M8 11h6"/></svg></span></button><figcaption><b>Fundamentos de Análisis de Datos</b><span>Cisco · UNPHU · Sep 2026</span></figcaption></figure>
+        <figure class="slide"><button class="slide-img" type="button" aria-label="Ampliar Data Analytics Essentials"><img src="certs/cisco-data-analytics-badge.jpg" alt="Certificado de finalización Data Analytics Essentials de Cisco Networking Academy" width="1210" height="935" loading="lazy"><span class="zoom" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4M11 8v6M8 11h6"/></svg></span></button><figcaption><b>Data Analytics Essentials</b><span>Cisco Networking Academy · Sep 2026</span></figcaption></figure>
+        <figure class="slide"><button class="slide-img" type="button" aria-label="Ampliar Cisco CCNA Fundamentos de Networking"><img src="certs/udemy-ccna.jpg" alt="Certificado Cisco CCNA Fundamentos de Networking para Redes IP de Udemy" width="1400" height="1041" loading="lazy"><span class="zoom" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4M11 8v6M8 11h6"/></svg></span></button><figcaption><b>CCNA: Fundamentos de Networking</b><span>Udemy · 16 h · Oct 2026</span></figcaption></figure>
+      </div>
+      <div class="dots" id="carDots" aria-label="Elegir certificado"></div>
+    </div>
+
+    <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Certificado ampliado" hidden>
+      <img id="lbImg" src="certs/certiplus-expert.jpg" alt="">
+      <div class="lb-cap" id="lbCap"></div>
+      <div class="lb-bar">
+        <button type="button" id="lbPrev" aria-label="Anterior"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <button type="button" id="lbClose" aria-label="Cerrar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+        <button type="button" id="lbNext" aria-label="Siguiente"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+      </div>
     </div>
 
     <div class="cred-group">
@@ -476,6 +538,38 @@ footer{padding-block:40px;color:var(--muted);font-size:13px;font-family:var(--f-
     cards.forEach(function(c){c.hidden=!(f==='all'||c.dataset.tags.split(' ').indexOf(f)>-1);});
   }
   fbtns.forEach(function(b){b.addEventListener('click',function(){applyFilter(b.dataset.f);});});
+
+  // certificate carousel + lightbox
+  var track=document.getElementById('carTrack'), slides=[].slice.call(track.querySelectorAll('.slide'));
+  var prev=document.getElementById('carPrev'), next=document.getElementById('carNext'), count=document.getElementById('carCount'), dotsBox=document.getElementById('carDots');
+  var cur=0;
+  slides.forEach(function(s,i){var b=document.createElement('button');b.type='button';b.setAttribute('aria-label','Certificado '+(i+1));b.addEventListener('click',function(){goTo(i);});dotsBox.appendChild(b);});
+  var dots=[].slice.call(dotsBox.children);
+  function goTo(i){i=Math.max(0,Math.min(slides.length-1,i));track.scrollTo({left:slides[i].offsetLeft-track.offsetLeft,behavior:'smooth'});}
+  function sync(){
+    var x=track.scrollLeft, best=0, bd=Infinity;
+    slides.forEach(function(s,i){var d=Math.abs(s.offsetLeft-track.offsetLeft-x); if(d<bd){bd=d;best=i;}});
+    if(track.scrollLeft+track.clientWidth>=track.scrollWidth-4) best=slides.length-1;
+    cur=best; count.textContent=(cur+1)+' / '+slides.length;
+    dots.forEach(function(d,i){d.setAttribute('aria-current',i===cur?'true':'false');});
+    prev.disabled=cur===0; next.disabled=cur===slides.length-1;
+  }
+  var t; track.addEventListener('scroll',function(){clearTimeout(t);t=setTimeout(sync,60);});
+  prev.addEventListener('click',function(){goTo(cur-1);});
+  next.addEventListener('click',function(){goTo(cur+1);});
+  track.addEventListener('keydown',function(e){if(e.key==='ArrowRight'){e.preventDefault();goTo(cur+1);}else if(e.key==='ArrowLeft'){e.preventDefault();goTo(cur-1);}});
+  sync();
+
+  var lb=document.getElementById('lightbox'), lbImg=document.getElementById('lbImg'), lbCap=document.getElementById('lbCap'), lbi=0, opener=null;
+  function show(i){lbi=(i+slides.length)%slides.length;var im=slides[lbi].querySelector('img'), cap=slides[lbi].querySelector('figcaption');lbImg.src=im.getAttribute('src');lbImg.alt=im.alt;lbCap.innerHTML=cap.innerHTML.replace('</b><span>','</b><br><span>');}
+  function openLb(i,el){opener=el;show(i);lb.hidden=false;document.body.style.overflow='hidden';document.getElementById('lbClose').focus();}
+  function closeLb(){lb.hidden=true;document.body.style.overflow='';goTo(lbi);if(opener)opener.focus();}
+  slides.forEach(function(s,i){s.querySelector('.slide-img').addEventListener('click',function(){openLb(i,this);});});
+  document.getElementById('lbClose').addEventListener('click',closeLb);
+  document.getElementById('lbPrev').addEventListener('click',function(){show(lbi-1);});
+  document.getElementById('lbNext').addEventListener('click',function(){show(lbi+1);});
+  lb.addEventListener('click',function(e){if(e.target===lb)closeLb();});
+  lb.addEventListener('keydown',function(e){if(e.key==='Escape')closeLb();else if(e.key==='ArrowRight')show(lbi+1);else if(e.key==='ArrowLeft')show(lbi-1);});
 
   // copy email
   var cm=document.getElementById('copyMail');
